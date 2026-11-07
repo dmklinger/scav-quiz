@@ -48,7 +48,7 @@ const makeQuizPage = (i: number) => {
         .append("div")
             .attr("class", "text")
             .attr("id", "item-intro")
-            .text(`Item-to-Guess #${i + 1}`);
+            .text(`Item-to-Guess #${i + 1} (of ${sampleSize})`);
     d3.select("#content-body")
         .append("div")
             .attr("class", "text")
@@ -72,11 +72,16 @@ const makeQuizPage = (i: number) => {
             .text(year);
     }
     d3.select("#year-selector").on("change", (_) => {
-        console.log("Change has occured");
         if ((d3.select("#year-selector").node() as HTMLInputElement)?.value !== "") {
-            d3.select("#continue-button")
-                .attr("class", "valid")
-                .text("Continue!");
+            if (i + 1 < sampleSize) {
+                d3.select("#continue-button")
+                    .attr("class", "valid")
+                    .text("Continue!");
+            } else {
+                d3.select("#continue-button")
+                    .attr("class", "valid")
+                    .text("Results!");
+            }
         } else {
             d3.select("#continue-button")
                 .attr("class", "invalid")
@@ -149,21 +154,21 @@ const makeIntro = () => {
     d3.select("#sample-size-options")
         .append("div")
             .attr("class", "sample-size-option unselected")
+            .attr("id", "sample-size-10")
+            .text("Small (10)")
+            .on("click", (_) => selectSampleSize(10));
+    d3.select("#sample-size-options")
+        .append("div")
+            .attr("class", "sample-size-option unselected")
             .attr("id", "sample-size-25")
-            .text("Small (25)")
+            .text("Medium (25)")
             .on("click", (_) => selectSampleSize(25));
     d3.select("#sample-size-options")
         .append("div")
             .attr("class", "sample-size-option unselected")
             .attr("id", "sample-size-50")
-            .text("Medium (50)")
+            .text("Large (50)")
             .on("click", (_) => selectSampleSize(50));
-    d3.select("#sample-size-options")
-        .append("div")
-            .attr("class", "sample-size-option unselected")
-            .attr("id", "sample-size-100")
-            .text("Large (100)")
-            .on("click", (_) => selectSampleSize(100));
     d3.select("#content-body")
         .append("div")
             .attr("id", "start-button")
