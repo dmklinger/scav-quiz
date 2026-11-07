@@ -94,7 +94,7 @@ body {
   color: white; 
 }
 
-#start-button, #continue-button {
+#start-button, #continue-button, #again-button {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -117,13 +117,13 @@ body {
     cursor: not-allowed;
 }
 
-#start-button.valid, #continue-button.valid {
+#start-button.valid, #continue-button.valid, #again-button {
     cursor: pointer;
     color: white;
     background-color: mediumblue;
 }
 
-#start-button.valid:hover {
+#start-button.valid:hover, #again-button:hover {
     cursor: pointer;
     color: white;
     background-color: darkblue;
@@ -138,4 +138,18 @@ body {
     width: min-content;
     font-size: 16px;
     margin: 5px;
+}
+
+#results-by-item-header {
+    font-weight: bold;
+    align-self: center;
+}
+
+.item-detail-item {
+    font-size: 20px;
+}
+
+.item-detail-guess {
+    font-size: 18px;
+    margin-left: 30px;
 }

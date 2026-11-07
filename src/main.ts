@@ -9,6 +9,7 @@ export interface ScavItem {
 
 let items: Record<string, ScavItem[]>;
 const quizItems: ScavItem[] = [];
+const guesses: number[] = [];
 let sampleSize: number;
 
 const uiFormat = () => {
@@ -36,8 +37,81 @@ const selectSampleSize = (n: number) => {
     console.log(`Selected samplesize ${sampleSize}`);
 };
 
-const makeEndPage = () => {
-    console.log("end page reached!");
+const makeResultsPage = () => {
+    d3.select("#content-body")
+        .selectAll("*")
+        .remove();
+
+    let exactlyRight = 0;
+    let aboutRight = 0;
+    const errors = [];
+    let sumErrors = 0;
+
+    for (let i = 0; i < sampleSize; i++) {
+        const quizItem = quizItems[i];
+        const guess = guesses[i];
+        const error = Math.abs(quizItem.year - guess);
+        errors.push(error);
+        sumErrors += error;
+        if (error == 0) exactlyRight += 1;
+        if (error <= 2.5) aboutRight += 1;
+    }
+
+    const meanError = sumErrors / sampleSize;
+    let sumOfDeviation = 0;
+    for (const error of errors) {
+        sumOfDeviation += error ** 2;
+    }
+    const stdDeviation = (sumOfDeviation / sampleSize) ** 0.5;
+
+    d3.select("#content-body")
+        .append("div")
+            .attr("class", "text")
+            .attr("id", "exact-results")
+            .text(`You got ${exactlyRight} / ${sampleSize} exactly right!`);
+    d3.select("#content-body")
+        .append("div")
+            .attr("class", "text")
+            .attr("id", "approximate-results")
+            .text(`You got ${aboutRight} / ${sampleSize} roughly* right!`);
+    d3.select("#content-body")
+        .append("div")
+            .attr("class", "text")
+            .attr("id", "mean-and-std-deviation")
+            .text(`You had an average error of ${meanError.toFixed(2)} years with a standard deviation of ${stdDeviation.toFixed(2)} years!`);
+    d3.select("#content-body")
+        .append("div")
+            .attr("class", "text")
+            .attr("id", "content-body-questionable-footnote")
+            .text("*within a five year period centered on the correct year");
+    d3.select("#content-body")
+        .append("div")
+            .attr("class", "text")
+            .attr("id", "results-by-item-header")
+            .text("Results by item:");
+
+    for (let i = 0; i < sampleSize; i++) {
+        const quizItem = quizItems[i];
+        const guess = guesses[i];
+        const error = Math.abs(quizItem.year - guess);
+        d3.select("#content-body")
+            .append("div")
+                .attr("class", "text item-detail-item")
+                .text(`${quizItem.year}.${quizItem.special}${quizItem.number}: ${quizItem.text}`);
+        d3.select("#content-body")
+            .append("div")
+                .attr("class", "text item-detail-guess")
+                .text(`You guessed ${guess}, with an error of ${error} years`);
+    }
+
+    d3.select("#content-body")
+        .append("div")
+            .attr("id", "again-button")
+            .attr("class", "invalid")
+            .text("Again!")
+            .on("click", (_) => {
+                makeIntro();
+            });
 };
 
 const makeQuizPage = (i: number) => {
@@ -94,17 +168,23 @@ const makeQuizPage = (i: number) => {
             .attr("class", "invalid")
             .text("Pick a year to continue")
             .on("click", (_) => {
-                if (d3.select("#continue-button").classed("valid"))
+                if (d3.select("#continue-button").classed("valid")) {
+                    const selection = Number(
+                        (d3.select("#year-selector").node() as HTMLInputElement)?.value,
+                    );
+                    guesses.push(selection);
                     if (i + 1 < sampleSize) {
                         makeQuizPage(i + 1);
                     } else {
-                        makeEndPage();
+                        makeResultsPage();
                     }
+                }
             });
 };
 
 const startQuiz = () => {
     while (quizItems.length) quizItems.pop();
+    while (guesses.length) guesses.pop();
     const years = Object.keys(items);
     const selections: string[][] = [];
     for (let i = 0; i < sampleSize; i++) {
