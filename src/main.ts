@@ -266,7 +266,7 @@ const load = () => {
             .attr("class", "text")
             .attr("id", "loading-message")
             .text("Loading, please wait...");
-    fetch("/all_items.json")
+    fetch("all_items.json")
         .then((response) => response.json())
         .then((loaded) => {
             items = loaded as Record<number, ScavItem[]>;
