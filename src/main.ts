@@ -34,7 +34,6 @@ const selectSampleSize = (n: number) => {
         .attr("class", "sample-size-option unselected");
     d3.select(`#sample-size-${n}`)
         .attr("class", "sample-size-option selected");
-    console.log(`Selected samplesize ${sampleSize}`);
 };
 
 const makeResultsPage = () => {
@@ -205,7 +204,6 @@ const startQuiz = () => {
         selections.push([selectedYear, String(selectedItem)]);
         quizItems.push(items[selectedYear][selectedItem]);
     }
-    console.log("selected items", quizItems);
     makeQuizPage(0);
 };
 
@@ -270,7 +268,6 @@ const load = () => {
         .then((response) => response.json())
         .then((loaded) => {
             items = loaded as Record<number, ScavItem[]>;
-            console.log(items);
             makeIntro();
         })
         .catch((error) => {
