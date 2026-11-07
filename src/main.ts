@@ -3,11 +3,12 @@ import * as d3 from "d3";
 export interface ScavItem {
     special: string;
     number: string;
-    year: string;
+    year: number;
     text: string;
 }
 
-let items: ScavItem[];
+let items: Record<string, ScavItem[]>;
+const quizItems: ScavItem[] = [];
 let sampleSize: number;
 
 const uiFormat = () => {
@@ -35,6 +36,25 @@ const selectSampleSize = (n: number) => {
     console.log(`Selected samplesize ${sampleSize}`);
 };
 
+const startQuiz = () => {
+    while (quizItems.length) quizItems.pop();
+    const years = Object.keys(items);
+    const selections: string[][] = [];
+    for (let i = 0; i < sampleSize; i++) {
+        let selectedYear: string;
+        let selectedItem: number;
+        do {
+            selectedYear = years[Math.floor(Math.random() * (years.length - 1))];
+            selectedItem = Math.floor(Math.random() * (items[selectedYear].length));
+        } while (selections.some(prevSelection => 
+            selectedYear === prevSelection[0] && String(selectedItem) === prevSelection[1],
+        ));
+        selections.push([selectedYear, String(selectedItem)]);
+        quizItems.push(items[selectedYear][selectedItem]);
+    }
+    console.log("selected items", quizItems);
+};
+
 const makeIntro = () => {
     d3.select("#content-body")
         .selectAll("*")
@@ -43,7 +63,7 @@ const makeIntro = () => {
         .append("div")
             .attr("class", "text")
             .attr("id", "content-body-intro")
-            .text("Can you tell which era Scav items are from? Find out with this scientific* quiz! We give you random items uniformly distributed across the history of Scav and you simply guess which year it's from. Good luck :)");
+            .text("Can you tell different Scav item writing eras apart? Find out with this scientific* quiz! We give you random items uniformly distributed across the history of Scav and you simply guess which year it's from. Good luck :)");
     d3.select("#content-body")
         .append("div")
             .attr("class", "text")
@@ -79,12 +99,8 @@ const makeIntro = () => {
         .append("div")
             .attr("id", "start-button")
             .attr("class", "invalid")
-            .text("Select a size to start!");
-};
-
-const main = () => {
-    makeIntro();
-    console.log(items);
+            .text("Select a size to start!")
+            .on("click", (_) => startQuiz());
 };
 
 const load = () => {
@@ -96,10 +112,15 @@ const load = () => {
     fetch("/all_items.json")
         .then((response) => response.json())
         .then((loaded) => {
-            items = loaded as ScavItem[];
-            main();
+            items = loaded as Record<number, ScavItem[]>;
+            console.log(items);
+            makeIntro();
         })
-        .catch((error) => console.error("Error loading data:", error));
+        .catch((error) => {
+            console.error("Error loading data:", error);
+            d3.select("#loading-message")
+                .text("Something went horribly wrong :(");
+        });
 };
 
 uiFormat();
