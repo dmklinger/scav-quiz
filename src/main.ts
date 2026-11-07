@@ -36,6 +36,68 @@ const selectSampleSize = (n: number) => {
     console.log(`Selected samplesize ${sampleSize}`);
 };
 
+const makeEndPage = () => {
+    console.log("end page reached!");
+};
+
+const makeQuizPage = (i: number) => {
+    d3.select("#content-body")
+        .selectAll("*")
+        .remove();
+    d3.select("#content-body")
+        .append("div")
+            .attr("class", "text")
+            .attr("id", "item-intro")
+            .text(`Item-to-Guess #${i + 1}`);
+    d3.select("#content-body")
+        .append("div")
+            .attr("class", "text")
+            .attr("id", "item-text")
+            .text(quizItems[i].text);
+    d3.select("#content-body")
+        .append("div")
+            .attr("class", "text")
+            .attr("id", "guess-text")
+            .text("Your guess...")
+        .append("select")
+            .attr("id", "year-selector")
+        .append("option")
+            .attr("value", "")
+            .text("-- Pick a year! --");
+    // not canonical but whatever
+    for (const year of Object.keys(items)) {
+        d3.select("#year-selector")
+            .append("option")
+            .attr("value", year)
+            .text(year);
+    }
+    d3.select("#year-selector").on("change", (_) => {
+        console.log("Change has occured");
+        if ((d3.select("#year-selector").node() as HTMLInputElement)?.value !== "") {
+            d3.select("#continue-button")
+                .attr("class", "valid")
+                .text("Continue!");
+        } else {
+            d3.select("#continue-button")
+                .attr("class", "invalid")
+                .text("Pick a year to continue");
+        }
+    });
+    d3.select("#content-body")
+        .append("div")
+            .attr("id", "continue-button")
+            .attr("class", "invalid")
+            .text("Pick a year to continue")
+            .on("click", (_) => {
+                if (d3.select("#continue-button").classed("valid"))
+                    if (i + 1 < sampleSize) {
+                        makeQuizPage(i + 1);
+                    } else {
+                        makeEndPage();
+                    }
+            });
+};
+
 const startQuiz = () => {
     while (quizItems.length) quizItems.pop();
     const years = Object.keys(items);
@@ -48,11 +110,18 @@ const startQuiz = () => {
             selectedItem = Math.floor(Math.random() * (items[selectedYear].length));
         } while (selections.some(prevSelection => 
             selectedYear === prevSelection[0] && String(selectedItem) === prevSelection[1],
-        ));
+        ) 
+            || items[selectedYear][selectedItem].text.toUpperCase().includes("TBA") 
+            || (
+                items[selectedYear][selectedItem].text.toUpperCase().includes("A copy of the")
+                && items[selectedYear][selectedItem].text.toUpperCase().includes("University of Chicago Scavenger Hunt List")
+            )
+        );
         selections.push([selectedYear, String(selectedItem)]);
         quizItems.push(items[selectedYear][selectedItem]);
     }
     console.log("selected items", quizItems);
+    makeQuizPage(0);
 };
 
 const makeIntro = () => {
@@ -100,7 +169,10 @@ const makeIntro = () => {
             .attr("id", "start-button")
             .attr("class", "invalid")
             .text("Select a size to start!")
-            .on("click", (_) => startQuiz());
+            .on("click", (_) => {
+                if (d3.select("#start-button").classed("valid"))
+                    startQuiz();
+            });
 };
 
 const load = () => {

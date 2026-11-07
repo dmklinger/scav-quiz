@@ -94,7 +94,7 @@ body {
   color: white; 
 }
 
-#start-button {
+#start-button, #continue-button {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -111,13 +111,13 @@ body {
     font-weight: bold;
 }
 
-#start-button.invalid {
+#start-button.invalid, #continue-button.invalid {
     font-style: italic;
     color: grey;
     cursor: not-allowed;
 }
 
-#start-button.valid {
+#start-button.valid, #continue-button.valid {
     cursor: pointer;
     color: white;
     background-color: mediumblue;
@@ -127,4 +127,15 @@ body {
     cursor: pointer;
     color: white;
     background-color: darkblue;
+}
+
+#item-intro, #guess-text {
+    font-weight: bold;
+}
+
+#year-selector {
+    min-width: 200px;
+    width: min-content;
+    font-size: 16px;
+    margin: 5px;
 }
